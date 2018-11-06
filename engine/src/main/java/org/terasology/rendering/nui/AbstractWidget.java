@@ -16,18 +16,19 @@
 package org.terasology.rendering.nui;
 
 import com.google.common.collect.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasology.rendering.nui.databinding.Binding;
 import org.terasology.rendering.nui.databinding.DefaultBinding;
 import org.terasology.rendering.nui.databinding.ReadOnlyBinding;
 import org.terasology.rendering.nui.skin.UISkin;
 import org.terasology.rendering.nui.widgets.UILabel;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-/**
- */
 public abstract class AbstractWidget implements UIWidget {
 
     @LayoutConfig
@@ -48,7 +49,12 @@ public abstract class AbstractWidget implements UIWidget {
     @LayoutConfig
     private float tooltipDelay = 0.5f;
 
+    @LayoutConfig
+    private int depth;
+
     private boolean focused;
+
+    private static  final Logger logger = LoggerFactory.getLogger(AbstractWidget.class);
 
     @LayoutConfig
     private Binding<Boolean> enabled = new DefaultBinding<>(true);
@@ -150,9 +156,6 @@ public abstract class AbstractWidget implements UIWidget {
 
     public void setVisible(boolean visible) {
         this.visible.set(visible);
-<<<<<<< Updated upstream
-=======
-        addOrRemove();
     }
 
     protected void addOrRemove() {
@@ -175,7 +178,6 @@ public abstract class AbstractWidget implements UIWidget {
                 }
             }
         }
->>>>>>> Stashed changes
     }
 
     public boolean isEnabled() {
@@ -192,6 +194,13 @@ public abstract class AbstractWidget implements UIWidget {
             }
         }
 
+    }
+
+    public int getDepth() {
+        return depth;
+    }
+    public void setDepth(int toSet) {
+        depth = toSet;
     }
 
     public void bindEnabled(Binding<Boolean> binding) {

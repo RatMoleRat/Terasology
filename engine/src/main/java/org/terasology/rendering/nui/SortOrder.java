@@ -1,7 +1,6 @@
 package org.terasology.rendering.nui;
 
 //TODO: figure out why so many are added to enabledWidgets, and so few removed
-//MAYBE FIXED; TEST
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,7 +142,8 @@ public class SortOrder extends BaseComponentSystem {
     public static void removeOne(int layer) {
         for (int i=0; i<layersFilled.size(); i++) {
             if (layersFilled.get(i)[0] == layer) {
-                layersFilled.get(i)[1]++;
+                layersFilled.get(i)[1]--;
+                return;
             }
         }
     }
