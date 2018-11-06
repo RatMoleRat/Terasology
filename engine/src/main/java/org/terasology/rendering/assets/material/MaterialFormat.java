@@ -57,10 +57,7 @@ public class MaterialFormat extends AbstractAssetFileFormat<MaterialData> {
 
     @Override
     public MaterialData load(ResourceUrn urn, List<AssetDataFile> inputs) throws IOException {
-        MaterialMetadata metadata;
-        try (InputStreamReader inputStreamReader = new InputStreamReader(inputs.get(0).openStream(), Charsets.UTF_8)) {
-            metadata = gson.fromJson(inputStreamReader, MaterialMetadata.class);
-        }
+        MaterialMetadata metadata = gson.fromJson(new InputStreamReader(inputs.get(0).openStream(), Charsets.UTF_8), MaterialMetadata.class);
 
         Optional<? extends Shader> shader = assetManager.getAsset(metadata.shader, Shader.class);
         if (shader.isPresent()) {

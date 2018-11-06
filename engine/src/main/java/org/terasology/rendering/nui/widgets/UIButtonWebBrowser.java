@@ -15,6 +15,7 @@
  */
 package org.terasology.rendering.nui.widgets;
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.config.Config;
@@ -29,22 +30,20 @@ import org.terasology.rendering.nui.layers.mainMenu.MessagePopup;
 
 import java.awt.Desktop;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 
 /**
  * Button with predefined action - open the URL in default web browser.
  */
 public class UIButtonWebBrowser extends UIButton {
 
-    private static final Logger logger = LoggerFactory.getLogger(UIButtonWebBrowser.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UIButtonWebBrowser.class);
     private static final String NEW_LINE = System.lineSeparator();
 
     /**
-     * If false, a confirmation popup should appear asking for permission before
-     * opening the web browser, otherwise don't.
+     * If false, a confirmation popup should appear asking
+     * for permission before opening the web browser, otherwise don't.
      */
     private Binding<Boolean> confirmed = new DefaultBinding<>(false);
 
@@ -70,7 +69,7 @@ public class UIButtonWebBrowser extends UIButton {
 
     private final ActivateEventListener openUrlInDefaultBrowser = button -> {
         if (!hasConfirmation()) {
-            logger.debug("Don't have confirmation for opening web browser.");
+            LOGGER.debug("Don't have confirmation for opening web browser.");
             showConfirmationPopup();
             return;
         }
@@ -79,7 +78,7 @@ public class UIButtonWebBrowser extends UIButton {
             try {
                 desktop.browse(new URI(this.url));
             } catch (IOException | URISyntaxException e) {
-                logger.warn("Can't open {} in default browser of your system.", this.url);
+                LOGGER.warn("Can't open {} in default browser of your system.", this.url);
                 showErrorPopup("Can't open " + this.url + " in default browser of your system.");
             }
         } else {
@@ -94,7 +93,7 @@ public class UIButtonWebBrowser extends UIButton {
                     runtime.exec(createCommand("xdg-open", this.url));
                 }
             } catch (IOException e) {
-                logger.warn("Can't recognize your OS and open the url {}.", this.url);
+                LOGGER.warn("Can't recognize your OS and open the url {}.", this.url);
                 showErrorPopup("Can't recognize your OS and open the url " + this.url);
             }
         }
@@ -121,23 +120,16 @@ public class UIButtonWebBrowser extends UIButton {
 
     private void showConfirmationPopup() {
         if (nuiManager == null || translationSystem == null) {
-            logger.error("Can't show confirmation popup!");
+            LOGGER.error("Can't show confirmation popup!");
             return;
         }
 
         ConfirmUrlPopup confirmUrlPopup = nuiManager.pushScreen(ConfirmUrlPopup.ASSET_URI, ConfirmUrlPopup.class);
         confirmUrlPopup.setMessage(translationSystem.translate("${engine:menu#button-web-browser-confirmation-title}"),
-                translationSystem.translate("${engine:menu#button-web-browser-confirmation-message}")
-                        + NEW_LINE + this.url);
+                translationSystem.translate("${engine:menu#button-web-browser-confirmation-message}") + NEW_LINE + this.url);
         confirmUrlPopup.setLeftButton(translationSystem.translate("${engine:menu#dialog-yes}"), this::openBrowser);
-        confirmUrlPopup.setRightButton(translationSystem.translate("${engine:menu#dialog-no}"), () -> {});
-        try {
-            if (webBrowserConfig != null) {
-                confirmUrlPopup.setCheckbox(webBrowserConfig, this.url);
-            }
-        } catch (MalformedURLException e) {
-            logger.error(this.url + " is malformed", e);
-        }
+        confirmUrlPopup.setRightButton(translationSystem.translate("${engine:menu#dialog-no}"), () -> { });
+        confirmUrlPopup.setCheckbox(webBrowserConfig, this.url);
     }
 
     private void showErrorPopup(final String message) {
@@ -155,35 +147,16 @@ public class UIButtonWebBrowser extends UIButton {
     }
 
     /**
-     * Sets the {@link UIButtonWebBrowser#url} value and sets
-     * {@link UIButtonWebBrowser#confirmed} to true if the given URL or Hostname is
-     * already trusted, otherwise confirmed is false.
-     *
-     * @throws MalformedURLException
+     * Sets the {@link UIButtonWebBrowser#url} value and sets {@link UIButtonWebBrowser#confirmed}
+     * to true if the given URL is already trusted, otherwise confirmed is false.
      */
     public UIButtonWebBrowser setUrl(String url) {
-        boolean trustedHostName = false;
         boolean trustedUrl = false;
-
         if (webBrowserConfig != null) {
-            try {
-                String hostname = new URL(url).getHost();
-                trustedHostName = webBrowserConfig.isHostNameTrusted(hostname);
-            } catch (MalformedURLException e) {
-                logger.error(url + " is malformed", e);
-            }
-
-            if (!trustedHostName) {
-                trustedUrl = webBrowserConfig.isUrlTrusted(url);
-            }
+            trustedUrl = webBrowserConfig.isUrlTrusted(url);
         }
 
-        if (trustedHostName || trustedUrl) {
-            confirmed.set(true);
-        } else {
-            confirmed.set(false);
-        }
-
+        confirmed.set(trustedUrl);
         this.url = url;
         return this;
     }

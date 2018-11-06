@@ -150,6 +150,32 @@ public abstract class AbstractWidget implements UIWidget {
 
     public void setVisible(boolean visible) {
         this.visible.set(visible);
+<<<<<<< Updated upstream
+=======
+        addOrRemove();
+    }
+
+    protected void addOrRemove() {
+        if (SortOrder.getEnabledWidgets() != null) {
+            if (!SortOrder.getEnabledWidgets().contains(this)) {
+                if (this.visible.get()) {
+                    logger.info("making it");
+                    ArrayList<AbstractWidget> widgets = SortOrder.getEnabledWidgets();
+                    widgets.add(this);
+                    SortOrder.setEnabledWidgets(widgets);
+                    SortOrder.addAnother(this.getDepth());
+                }
+            } else {
+                if (!this.visible.get()) {
+                    logger.info("deleting it");
+                    ArrayList<AbstractWidget> widgets = SortOrder.getEnabledWidgets();
+                    widgets.remove(this);
+                    SortOrder.setEnabledWidgets(widgets);
+                    SortOrder.removeOne(this.getDepth());
+                }
+            }
+        }
+>>>>>>> Stashed changes
     }
 
     public boolean isEnabled() {

@@ -52,24 +52,7 @@
                                 },
                                 {
                                     "type": "UILabel",
-                                    "text": "Always accept this URL",
-                                    "id": "alwaysAccept"
-                                },
-                            ]
-                        },
-                        {
-                            "type":"ColumnLayout",
-                            "columns":2,
-                            "column-widths":[0.1,0.90],
-                            "contents": [
-                                {
-                                    "type": "UICheckbox",
-                                    "id": "saveHostName",
-                                    "family": "option-grid"
-                                },
-                                {
-                                    "type": "UILabel",
-                                    "text": "Always accept URLs to this website",
+                                    "text": "Always accept this url",
                                     "id": "alwaysAccept"
                                 },
                             ]

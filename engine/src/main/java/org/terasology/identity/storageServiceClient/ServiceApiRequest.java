@@ -48,9 +48,9 @@ final class ServiceApiRequest {
     }
 
     private static void parseError(HttpURLConnection conn) throws IOException, StorageServiceException {
-        try (InputStreamReader errResponse = new InputStreamReader(conn.getErrorStream())) {
+        try (InputStream errResponse = conn.getErrorStream()) {
             try {
-                throw new StorageServiceException(GSON.fromJson(errResponse, ErrorResponseData.class).error);
+                throw new StorageServiceException(GSON.fromJson(new InputStreamReader(errResponse), ErrorResponseData.class).error);
             } catch (JsonSyntaxException e) {
                 throw new StorageServiceException();
             }

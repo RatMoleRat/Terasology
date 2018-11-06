@@ -208,7 +208,7 @@ public class JInputControllerDevice implements ControllerDevice {
      * @param controller the controller to remove
      */
     private void removeController(Controller controller) {
-        controllers.remove(controller);
+        controllers.remove(controller.getName());
         logger.info("Removed controller: " + controller.getName());
     }
 

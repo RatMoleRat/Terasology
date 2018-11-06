@@ -81,14 +81,11 @@ public final class BindFbo implements StateChange {
             return this;
         }
 
+        // TODO: Add .hashCode()
+
         @Override
         public boolean equals(Object obj) {
             return (obj instanceof UnbindFbo);
-        }
-
-        @Override
-        public int hashCode() {
-            return UnbindFbo.class.hashCode();
         }
 
         @Override
