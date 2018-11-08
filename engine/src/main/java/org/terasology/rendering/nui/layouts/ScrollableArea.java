@@ -86,6 +86,8 @@ public class ScrollableArea extends CoreLayout {
      */
     @LayoutConfig
     private Integer preferredHeight;
+    @LayoutConfig
+    private int depth;
 
     private UIScrollbar verticalBar = new UIScrollbar(true);
     private UIScrollbar horizontalBar = new UIScrollbar(false);

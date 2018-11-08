@@ -1,7 +1,5 @@
 package org.terasology.rendering.nui;
-
-//TODO: figure out why so many are added to enabledWidgets, and so few removed
-
+//TODO: figure out why it is never deleting. test and check for the ids
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.engine.SimpleUri;
@@ -25,15 +23,17 @@ import java.util.Map;
 
 @RegisterSystem(RegisterMode.ALWAYS)
 public class SortOrder extends BaseComponentSystem {
+    private static ArrayList<Integer> id;
     private static int current;
     private static ArrayList<Integer[]> layersFilled; //arg1 of the Integer[] is the layer depth, arg2 is the number of things on that layer
     private static int index;
+    private static int uiIndex;
     private static int focusLayer;
     private static final Logger logger = LoggerFactory.getLogger(SortOrder.class);
-    private static ArrayList<AbstractWidget> widgetList;
-    private static ArrayList<AbstractWidget> enabledWidgets;
+    //private static ArrayList<Class<AbstractWidget>> widgetList;
+    //private static ArrayList<AbstractWidget> enabledWidgets;
+    private static ArrayList<CoreScreenLayer> enabledWidgets;
     private static boolean initialized = false;
-    private static ArrayList<String> widgetIDs;
 
     @In
     private BindsManager bindsManager;
@@ -43,9 +43,9 @@ public class SortOrder extends BaseComponentSystem {
         initialized = true;
         logger.info("initializing");
         Map<Integer, BindableButton> keys = bindsManager.getKeyBinds();
-        if (keys.containsKey(Keyboard.Key.N.getId())) {
+        if (keys.containsKey(Keyboard.Key.SEMICOLON.getId())) {
             logger.info("contains key!");
-            keys.get(Keyboard.Key.N.getId()).subscribe(new BindButtonSubscriber() {
+            keys.get(Keyboard.Key.SEMICOLON.getId()).subscribe(new BindButtonSubscriber() {
                 @Override
                 public boolean onPress(float delta, EntityRef target) {
                     target.send(new FocusChangedEvent());
@@ -82,17 +82,19 @@ public class SortOrder extends BaseComponentSystem {
                     return false;
                 }
             };
-            keys.put(Keyboard.Key.N.getId(), new BindableButtonImpl(new SimpleUri("changeFocus"), "Change Focus", new BindButtonEvent()));
+            keys.put(Keyboard.Key.SEMICOLON.getId(), new BindableButtonImpl(new SimpleUri("changeFocus"), "Change Focus", new BindButtonEvent()));
             logger.info("made key!");
-            keys.get(Keyboard.Key.N.getId()).subscribe(bindButtonSubscriber);
+            keys.get(Keyboard.Key.SEMICOLON.getId()).subscribe(bindButtonSubscriber);
             logger.info("added subscriber!");
         }
         current = 0;
         focusLayer = 0;
         index = 0;
+        uiIndex = -1;
         layersFilled = new ArrayList<Integer[]>();
-        widgetList = new ArrayList<AbstractWidget>();
-        enabledWidgets = new ArrayList<AbstractWidget>();
+        //widgetList = new ArrayList<Class<AbstractWidget>>();
+        //enabledWidgets = new ArrayList<AbstractWidget>();
+        enabledWidgets = new ArrayList<CoreScreenLayer>();
 }
 
     @ReceiveEvent
@@ -113,11 +115,9 @@ public class SortOrder extends BaseComponentSystem {
             if (widget.getDepth()==focusLayer) {
                 logger.info("gained focus");
                 widget.onGainFocus();
-                widget.setEnabled(true);
             } else {
                 logger.info("lost focus");
                 widget.onLoseFocus();
-                widget.setEnabled(false);
             }
         }
     }
@@ -147,23 +147,56 @@ public class SortOrder extends BaseComponentSystem {
             }
         }
     }
-    public static void addToWidgetList(AbstractWidget widget) {
+    /*
+    public static void changeWidgetList(Class<AbstractWidget> widget, int depth, boolean add) {
         if (initialized) {
-            widgetList.add(widget);
-            addAnother(widget.getDepth());
-            current++;
+            if (add) {
+                widgetList.add(widget);
+                logger.info("sizeOfWidgetList: "+String.valueOf(widgetList.size()));
+                addAnother(depth);
+                current++;
+            } else {
+                if (widgetList.contains(widget)) {
+                    widgetList.remove(widget);
+                    removeOne(depth);
+                }
+            }
+            logger.info("sizeOfWidgetList: "+String.valueOf(widgetList.size()));
+            logger.info("widgetList: "+widgetList);
+        }
+    }*/
+    public static void setFocusLayer(int toSet) {
+        if (initialized) {
+            focusLayer = toSet;
         }
     }
-    public static void setFocusLayer(int toSet) {
-        focusLayer = toSet;
+    public static void setEnabledWidgets(ArrayList<CoreScreenLayer> widgetList) {
+        if (initialized) {
+            enabledWidgets = widgetList;
+        }
     }
+    public static ArrayList<CoreScreenLayer> getEnabledWidgets() {
+        return enabledWidgets;
+    }
+    /*
     public static void setEnabledWidgets(ArrayList<AbstractWidget> widgetList) {
         enabledWidgets = widgetList;
     }
     public static ArrayList<AbstractWidget> getEnabledWidgets() {
         return enabledWidgets;
     }
-    public static ArrayList<String> getWidgetIDs() {
-        return widgetIDs;
+    public static void setWidgetList(ArrayList<Class<AbstractWidget>> widgets) {
+        widgetList = widgets;
+    }
+    public static ArrayList<Class<AbstractWidget>> getWidgetList() {
+        return widgetList;
+    } */
+    public static int makeIndex() {
+        logger.info("uiIndex: "+uiIndex);
+        uiIndex++;
+        return uiIndex;
+    }
+    public static boolean isInitialized() {
+        return initialized;
     }
 }

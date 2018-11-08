@@ -24,10 +24,7 @@ import org.terasology.rendering.nui.databinding.ReadOnlyBinding;
 import org.terasology.rendering.nui.skin.UISkin;
 import org.terasology.rendering.nui.widgets.UILabel;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public abstract class AbstractWidget implements UIWidget {
 
@@ -54,6 +51,8 @@ public abstract class AbstractWidget implements UIWidget {
 
     private boolean focused;
 
+   // private int index;
+
     private static  final Logger logger = LoggerFactory.getLogger(AbstractWidget.class);
 
     @LayoutConfig
@@ -61,10 +60,14 @@ public abstract class AbstractWidget implements UIWidget {
 
     public AbstractWidget() {
         id = "";
+        //setIndex();
+        //addOrRemove();
     }
 
     public AbstractWidget(String id) {
         this.id = id;
+        //setIndex();
+        //addOrRemove();
     }
 
     @Override
@@ -75,6 +78,8 @@ public abstract class AbstractWidget implements UIWidget {
         return DISABLED_MODE;
     }
 
+    //public final int getIndex() { return index; }
+    //public final void setIndex() { this.index = SortOrder.makeIndex(); }
     @Override
     public final String getId() {
         return id;
@@ -155,30 +160,56 @@ public abstract class AbstractWidget implements UIWidget {
     }
 
     public void setVisible(boolean visible) {
+        logger.info("setting visible");
         this.visible.set(visible);
+        //addOrRemove();
     }
 
-    protected void addOrRemove() {
+    /*protected void addOrRemove() {
+        logger.info("this index: "+getIndex());
         if (SortOrder.getEnabledWidgets() != null) {
-            if (!SortOrder.getEnabledWidgets().contains(this)) {
+            //if (!SortOrder.getWidgetList().contains(this.getClass())) {
+            boolean contains = false;
+            Iterator iterator = SortOrder.getEnabledWidgets().iterator();
+            while (iterator.hasNext()) {
+                AbstractWidget next = (AbstractWidget)iterator.next();
+                logger.info("other index: "+next.getIndex());
+                if (next.getIndex() == getIndex()) {
+                    contains = true;
+                    break;
+                }
+            }
+            if (SortOrder.getEnabledWidgets().size()==0||!contains) {
+                logger.info("enabledWidgets: " + SortOrder.getEnabledWidgets());
                 if (this.visible.get()) {
                     logger.info("making it");
-                    ArrayList<AbstractWidget> widgets = SortOrder.getEnabledWidgets();
-                    widgets.add(this);
-                    SortOrder.setEnabledWidgets(widgets);
-                    SortOrder.addAnother(this.getDepth());
+                    ArrayList<AbstractWidget> enabledWidgets = SortOrder.getEnabledWidgets();
+
+                    enabledWidgets.add(this);
+                    SortOrder.setEnabledWidgets(enabledWidgets);
+
+                    //ArrayList<Class<AbstractWidget>> widgets = SortOrder.getWidgetList();
+                    //SortOrder.changeWidgetList((Class<AbstractWidget>) this.getClass(), this.getDepth(), true);
                 }
-            } else {
+            } else{
+                logger.info("in else...");
                 if (!this.visible.get()) {
                     logger.info("deleting it");
-                    ArrayList<AbstractWidget> widgets = SortOrder.getEnabledWidgets();
-                    widgets.remove(this);
-                    SortOrder.setEnabledWidgets(widgets);
-                    SortOrder.removeOne(this.getDepth());
+                    ArrayList<AbstractWidget> enabledWidgets = SortOrder.getEnabledWidgets();
+                    for (int i = 0; i < enabledWidgets.size(); i++) {
+                        if (enabledWidgets.get(i).getIndex() == getIndex()) {
+                            enabledWidgets.remove(i);
+                            logger.info("removed");
+                        }
+                    }
+                    SortOrder.setEnabledWidgets(enabledWidgets);
+
+                    //ArrayList<Class<AbstractWidget>> widgets = SortOrder.getWidgetList();
+                    //SortOrder.changeWidgetList((Class<AbstractWidget>) this.getClass(), this.getDepth(), false);
                 }
             }
         }
-    }
+    }*/
 
     public boolean isEnabled() {
         return enabled.get();

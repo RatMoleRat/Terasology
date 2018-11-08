@@ -33,6 +33,7 @@ public abstract class CoreWidget extends AbstractWidget {
 
     public CoreWidget(String id) {
         super(id);
+        //addOrRemove();
     }
 
     @Override

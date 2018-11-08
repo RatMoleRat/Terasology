@@ -117,6 +117,8 @@ public interface UIWidget extends Iterable<UIWidget> {
 
     boolean canBeFocus();
 
+    int getDepth();
+
     void bindTooltip(Binding<UIWidget> bind);
 
     void setTooltip(UIWidget value);
