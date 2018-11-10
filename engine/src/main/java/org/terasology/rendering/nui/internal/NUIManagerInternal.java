@@ -678,5 +678,8 @@ public class NUIManagerInternal extends BaseComponentSystem implements NUIManage
             setHUDVisible(true);
         }
     }
-
+    @Override
+    public CanvasControl getCanvas() {
+        return canvas;
+    }
 }

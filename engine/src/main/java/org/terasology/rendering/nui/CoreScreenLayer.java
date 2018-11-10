@@ -56,6 +56,9 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
     @LayoutConfig
     private UIWidget contents;
 
+    @LayoutConfig
+    private int depth=-999999;
+
     private NUIManager manager;
 
     private int index;
@@ -67,6 +70,15 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
 
     public CoreScreenLayer(String id) {
         super(id);
+    }
+
+    public int getDepth() { return depth; }
+
+    public void setDepthAuto() {
+        if (SortOrder.isInitialized()) {
+            depth = SortOrder.getCurrent();
+            logger.info("this: "+this+" ~~~ depth: "+depth);
+        }
     }
 
     @Override
@@ -84,16 +96,20 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
 
     @Override
     public void onOpened() {
+        /*
         if (!checkIfContains()) {
             setIndex();
+        }*/
+        logger.info("name: "+this+" ~~~ depth: "+depth);
+        if (depth == -999999) {
+            setDepthAuto();
         }
-        logger.info("name: "+this+" ~~~ index: "+index);
+        logger.info("depthB: "+depth);
         animationSystem.triggerFromPrev();
         onScreenOpened();
     }
 
     protected void addOrRemove(boolean showing) {
-        logger.info("this index: "+getIndex());
         if (SortOrder.getEnabledWidgets() != null) {
             if (!SortOrder.getEnabledWidgets().contains(this)) {
                 logger.info("enabledWidgets: " + SortOrder.getEnabledWidgets());
@@ -104,6 +120,8 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
                     enabledWidgets.add(this);
                     SortOrder.setEnabledWidgets(enabledWidgets);
 
+                    SortOrder.addAnother(depth);
+
                     logger.info("enabledWidgets: " + SortOrder.getEnabledWidgets());
                 }
             } else {
@@ -113,6 +131,8 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
                     ArrayList<CoreScreenLayer> enabledWidgets = SortOrder.getEnabledWidgets();
                     enabledWidgets.remove(this);
                     SortOrder.setEnabledWidgets(enabledWidgets);
+
+                    SortOrder.removeOne(depth);
 
                     //ArrayList<Class<AbstractWidget>> widgets = SortOrder.getWidgetList();
                     //SortOrder.changeWidgetList((Class<AbstractWidget>) this.getClass(), this.getDepth(), false);
@@ -154,12 +174,12 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
         }
     }
 
+    /*
     private boolean checkIfContains() {
         if (SortOrder.isInitialized()) {
             Iterator iterator = SortOrder.getEnabledWidgets().iterator();
             while (iterator.hasNext()) {
                 CoreScreenLayer next = (CoreScreenLayer) iterator.next();
-                logger.info("other index: "+next.getIndex());
                 if (next.getIndex() == getIndex()) {
                     return true;
                 }
@@ -167,7 +187,7 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
             return  false;
         }
         return false;
-    }
+    }*/
 
     /**
      * Lifecycle method called when this screen is displayed under any circumstance.
@@ -218,6 +238,10 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
         if (contents != null) {
             contents.update(delta);
             animationSystem.update(delta);
+
+            if (depth == -999999) {
+                setDepthAuto();
+            }
         }
     }
 

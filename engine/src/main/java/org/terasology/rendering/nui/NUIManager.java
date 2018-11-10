@@ -19,6 +19,7 @@ import org.terasology.assets.ResourceUrn;
 import org.terasology.entitySystem.systems.ComponentSystem;
 import org.terasology.reflection.metadata.ClassLibrary;
 import org.terasology.rendering.nui.asset.UIElement;
+import org.terasology.rendering.nui.internal.CanvasControl;
 import org.terasology.rendering.nui.layers.hud.HUDScreenLayer;
 
 /**
@@ -128,5 +129,7 @@ public interface NUIManager extends ComponentSystem, FocusManager {
     void setForceReleasingMouse(boolean value);
 
     void invalidate();
+
+    CanvasControl getCanvas();
 
 }

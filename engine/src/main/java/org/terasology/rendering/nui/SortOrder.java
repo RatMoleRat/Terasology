@@ -1,7 +1,9 @@
 package org.terasology.rendering.nui;
-//TODO: figure out why it is never deleting. test and check for the ids
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.context.Context;
+import org.terasology.context.internal.ContextImpl;
 import org.terasology.engine.SimpleUri;
 import org.terasology.engine.subsystem.config.BindsManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -28,12 +30,14 @@ public class SortOrder extends BaseComponentSystem {
     private static ArrayList<Integer[]> layersFilled; //arg1 of the Integer[] is the layer depth, arg2 is the number of things on that layer
     private static int index;
     private static int uiIndex;
-    private static int focusLayer;
+    private static int first;
     private static final Logger logger = LoggerFactory.getLogger(SortOrder.class);
     //private static ArrayList<Class<AbstractWidget>> widgetList;
     //private static ArrayList<AbstractWidget> enabledWidgets;
     private static ArrayList<CoreScreenLayer> enabledWidgets;
     private static boolean initialized = false;
+    private Canvas canvas;
+    private Context context;
 
     @In
     private BindsManager bindsManager;
@@ -41,19 +45,21 @@ public class SortOrder extends BaseComponentSystem {
     @ReceiveEvent
     public void onPlayerSpawnedEvent(OnPlayerSpawnedEvent event, EntityRef player) {
         initialized = true;
-        logger.info("initializing");
+        logger.info("initializing...");
         Map<Integer, BindableButton> keys = bindsManager.getKeyBinds();
         if (keys.containsKey(Keyboard.Key.SEMICOLON.getId())) {
             logger.info("contains key!");
             keys.get(Keyboard.Key.SEMICOLON.getId()).subscribe(new BindButtonSubscriber() {
                 @Override
                 public boolean onPress(float delta, EntityRef target) {
+                    logger.info("button pressed");
                     target.send(new FocusChangedEvent());
                     return false;
                 }
 
                 @Override
                 public boolean onRepeat(float delta, EntityRef target) {
+                    logger.info("button held");
                     target.send(new FocusChangedEvent());
                     return false;
                 }
@@ -64,15 +70,18 @@ public class SortOrder extends BaseComponentSystem {
                 }
             });
         } else {
+            logger.info("doesn't contain key");
             BindButtonSubscriber bindButtonSubscriber = new BindButtonSubscriber() {
                 @Override
                 public boolean onPress(float delta, EntityRef target) {
+                    logger.info("button pressed");
                     target.send(new FocusChangedEvent());
                     return false;
                 }
 
                 @Override
                 public boolean onRepeat(float delta, EntityRef target) {
+                    logger.info("button held");
                     target.send(new FocusChangedEvent());
                     return false;
                 }
@@ -88,14 +97,15 @@ public class SortOrder extends BaseComponentSystem {
             logger.info("added subscriber!");
         }
         current = 0;
-        focusLayer = 0;
+        first = 0;
         index = 0;
         uiIndex = -1;
         layersFilled = new ArrayList<Integer[]>();
         //widgetList = new ArrayList<Class<AbstractWidget>>();
         //enabledWidgets = new ArrayList<AbstractWidget>();
         enabledWidgets = new ArrayList<CoreScreenLayer>();
-}
+        context = new ContextImpl();
+    }
 
     @ReceiveEvent
     public void changeFocus(FocusChangedEvent event, EntityRef ref) {
@@ -103,22 +113,41 @@ public class SortOrder extends BaseComponentSystem {
         logger.info("changing focus");
         index++;
         logger.info("index: "+index);
+        int iterator;
         if (index < layersFilled.size()){
-            focusLayer = layersFilled.get(index)[0];
+            iterator = layersFilled.get(index)[0];
         } else {
-            logger.info("resetting index...");
             index = 0;
+            iterator = layersFilled.get(index)[0];
         }
 
-        logger.info("enablesWidgets length: "+enabledWidgets.size());
-        for(AbstractWidget widget:enabledWidgets) {
-            if (widget.getDepth()==focusLayer) {
-                logger.info("gained focus");
-                widget.onGainFocus();
-            } else {
-                logger.info("lost focus");
-                widget.onLoseFocus();
+        logger.info("layers filled: "+layersFilled.size());
+        boolean loopThroughDone = false;
+
+
+        int tempIndex = index;
+        int timesLooping = 0;
+        logger.info("layers filled: "+layersFilled);
+        ArrayList<CoreScreenLayer> widgetsCopy = new ArrayList<CoreScreenLayer>(enabledWidgets);
+        while (!loopThroughDone) {
+            for (CoreScreenLayer widget : widgetsCopy) {
+                if (widget.getDepth() == iterator) {
+                    logger.info("drawn: "+widget.getId()+" ~~~ iterator: "+iterator);
+                    //TODO: figure out the rendering here
+                    widget.getManager().render();
+                }
             }
+            if (tempIndex < layersFilled.size()){
+                iterator = layersFilled.get(tempIndex)[0];
+                tempIndex++;
+            } else {
+                tempIndex = 0;
+            }
+            logger.info("iterator: "+iterator);
+            if (timesLooping > layersFilled.size()) {
+                loopThroughDone = true;
+            }
+            timesLooping++;
         }
     }
 
@@ -127,8 +156,10 @@ public class SortOrder extends BaseComponentSystem {
     }
 
     public static int getCurrent() {
+        current++;
         return current;
     }
+
     public static void addAnother(int layer) {
         try {
             layersFilled.get(layer)[1]++;
@@ -165,9 +196,9 @@ public class SortOrder extends BaseComponentSystem {
             logger.info("widgetList: "+widgetList);
         }
     }*/
-    public static void setFocusLayer(int toSet) {
+    public static void setfirst(int toSet) {
         if (initialized) {
-            focusLayer = toSet;
+            first = toSet;
         }
     }
     public static void setEnabledWidgets(ArrayList<CoreScreenLayer> widgetList) {
@@ -192,6 +223,7 @@ public class SortOrder extends BaseComponentSystem {
         return widgetList;
     } */
     public static int makeIndex() {
+        logger.info("uiIndex: "+uiIndex);
         logger.info("uiIndex: "+uiIndex);
         uiIndex++;
         return uiIndex;
