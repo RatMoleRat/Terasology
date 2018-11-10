@@ -1,7 +1,7 @@
 package org.terasology.rendering.nui;
 
 
-import org.terasology.entitySystem.event.AbstractConsumableEvent;
+import org.terasology.entitySystem.event.Event;
 
-public class FocusChangedEvent extends AbstractConsumableEvent {
+public class FocusChangedEvent implements Event {
 }

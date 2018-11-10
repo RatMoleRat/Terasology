@@ -42,6 +42,11 @@ public class SortOrder extends BaseComponentSystem {
     @In
     private BindsManager bindsManager;
 
+    /**
+     * Initializes sort order
+     * @param event
+     * @param player
+     */
     @ReceiveEvent
     public void onPlayerSpawnedEvent(OnPlayerSpawnedEvent event, EntityRef player) {
         initialized = true;
@@ -52,14 +57,12 @@ public class SortOrder extends BaseComponentSystem {
             keys.get(Keyboard.Key.SEMICOLON.getId()).subscribe(new BindButtonSubscriber() {
                 @Override
                 public boolean onPress(float delta, EntityRef target) {
-                    logger.info("button pressed");
                     target.send(new FocusChangedEvent());
                     return false;
                 }
 
                 @Override
                 public boolean onRepeat(float delta, EntityRef target) {
-                    logger.info("button held");
                     target.send(new FocusChangedEvent());
                     return false;
                 }
@@ -74,14 +77,12 @@ public class SortOrder extends BaseComponentSystem {
             BindButtonSubscriber bindButtonSubscriber = new BindButtonSubscriber() {
                 @Override
                 public boolean onPress(float delta, EntityRef target) {
-                    logger.info("button pressed");
                     target.send(new FocusChangedEvent());
                     return false;
                 }
 
                 @Override
                 public boolean onRepeat(float delta, EntityRef target) {
-                    logger.info("button held");
                     target.send(new FocusChangedEvent());
                     return false;
                 }
@@ -109,57 +110,82 @@ public class SortOrder extends BaseComponentSystem {
 
     @ReceiveEvent
     public void changeFocus(FocusChangedEvent event, EntityRef ref) {
-        Collections.sort(layersFilled, (a, b) -> Math.max(a[0], b[0]));
-        logger.info("changing focus");
-        index++;
-        logger.info("index: "+index);
-        int iterator;
-        if (index < layersFilled.size()){
-            iterator = layersFilled.get(index)[0];
-        } else {
-            index = 0;
-            iterator = layersFilled.get(index)[0];
-        }
+        rotateOrder(true);
+    }
 
-        logger.info("layers filled: "+layersFilled.size());
-        boolean loopThroughDone = false;
-
-
-        int tempIndex = index;
-        int timesLooping = 0;
-        logger.info("layers filled: "+layersFilled);
-        ArrayList<CoreScreenLayer> widgetsCopy = new ArrayList<CoreScreenLayer>(enabledWidgets);
-        while (!loopThroughDone) {
-            for (CoreScreenLayer widget : widgetsCopy) {
-                if (widget.getDepth() == iterator) {
-                    logger.info("drawn: "+widget.getId()+" ~~~ iterator: "+iterator);
-                    //TODO: figure out the rendering here
-                    widget.getManager().render();
-                }
+    /**
+     * rotates through the elements
+     * @param increment
+     */
+    public static void rotateOrder(boolean increment) {
+        if (layersFilled.size()>0) {
+            Collections.sort(layersFilled, (a, b) -> Math.max(a[0], b[0]));
+            logger.info("changing focus");
+            if (increment) {
+                index++;
             }
-            if (tempIndex < layersFilled.size()){
-                iterator = layersFilled.get(tempIndex)[0];
-                tempIndex++;
+            int iterator;
+            if (index < layersFilled.size()) {
+                iterator = layersFilled.get(index)[0];
             } else {
-                tempIndex = 0;
+                index = 0;
+                iterator = layersFilled.get(index)[0];
             }
-            logger.info("iterator: "+iterator);
-            if (timesLooping > layersFilled.size()) {
-                loopThroughDone = true;
+            boolean loopThroughDone = false;
+
+
+            int tempIndex = index;
+            int timesLooping = 0;
+            ArrayList<CoreScreenLayer> widgetsCopy = new ArrayList<CoreScreenLayer>(enabledWidgets);
+            while (!loopThroughDone) {
+                for (CoreScreenLayer widget : widgetsCopy) {
+                    widget.setInSortOrder(true);
+                    if (widget.getDepth() == iterator) {
+                        String id = widget.getId();
+                        logger.info("drawn: " + widget.getId() + " ~~~ iterator: " + iterator);
+
+                        widget.getManager().pushScreen(widget.getId());
+                        widget.getManager().render();
+                    }
+                    widget.setInSortOrder(false);
+                }
+                if (tempIndex < layersFilled.size()) {
+                    iterator = layersFilled.get(tempIndex)[0];
+                    tempIndex++;
+                } else {
+                    tempIndex = 0;
+                }
+                if (timesLooping > layersFilled.size()) {
+                    loopThroughDone = true;
+                }
+                timesLooping++;
             }
-            timesLooping++;
         }
     }
 
+    /**
+     * for sorting layersFilled
+     * @param a
+     * @param b
+     * @return
+     */
     private Integer forSort(Integer[] a, Integer[] b) {
         return Math.max(a[0], b[0]);
     }
 
+    /**
+     * increments current (for depth)
+     * @return the new value of current
+     */
     public static int getCurrent() {
         current++;
         return current;
     }
 
+    /**
+     * adds another occurrence of a certain depth to layers filled
+     * @param layer the depth
+     */
     public static void addAnother(int layer) {
         try {
             layersFilled.get(layer)[1]++;
@@ -170,6 +196,11 @@ public class SortOrder extends BaseComponentSystem {
             layersFilled.add(toAdd);
         }
     }
+
+    /**
+     * removes an occurance of a certain depth to layers filled
+     * @param layer the depth
+     */
     public static void removeOne(int layer) {
         for (int i=0; i<layersFilled.size(); i++) {
             if (layersFilled.get(i)[0] == layer) {
@@ -178,29 +209,7 @@ public class SortOrder extends BaseComponentSystem {
             }
         }
     }
-    /*
-    public static void changeWidgetList(Class<AbstractWidget> widget, int depth, boolean add) {
-        if (initialized) {
-            if (add) {
-                widgetList.add(widget);
-                logger.info("sizeOfWidgetList: "+String.valueOf(widgetList.size()));
-                addAnother(depth);
-                current++;
-            } else {
-                if (widgetList.contains(widget)) {
-                    widgetList.remove(widget);
-                    removeOne(depth);
-                }
-            }
-            logger.info("sizeOfWidgetList: "+String.valueOf(widgetList.size()));
-            logger.info("widgetList: "+widgetList);
-        }
-    }*/
-    public static void setfirst(int toSet) {
-        if (initialized) {
-            first = toSet;
-        }
-    }
+
     public static void setEnabledWidgets(ArrayList<CoreScreenLayer> widgetList) {
         if (initialized) {
             enabledWidgets = widgetList;
@@ -209,25 +218,11 @@ public class SortOrder extends BaseComponentSystem {
     public static ArrayList<CoreScreenLayer> getEnabledWidgets() {
         return enabledWidgets;
     }
-    /*
-    public static void setEnabledWidgets(ArrayList<AbstractWidget> widgetList) {
-        enabledWidgets = widgetList;
-    }
-    public static ArrayList<AbstractWidget> getEnabledWidgets() {
-        return enabledWidgets;
-    }
-    public static void setWidgetList(ArrayList<Class<AbstractWidget>> widgets) {
-        widgetList = widgets;
-    }
-    public static ArrayList<Class<AbstractWidget>> getWidgetList() {
-        return widgetList;
-    } */
     public static int makeIndex() {
-        logger.info("uiIndex: "+uiIndex);
-        logger.info("uiIndex: "+uiIndex);
         uiIndex++;
         return uiIndex;
     }
+
     public static boolean isInitialized() {
         return initialized;
     }

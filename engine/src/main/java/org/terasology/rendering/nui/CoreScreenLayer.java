@@ -35,12 +35,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 
-/**
- */
 public abstract class CoreScreenLayer extends AbstractWidget implements UIScreenLayer {
 
     private  static final Logger logger = LoggerFactory.getLogger(CoreScreenLayer.class);
 
+    private boolean inSortOrder = false;
     private static final InteractionListener DEFAULT_SCREEN_LISTENER = new BaseInteractionListener() {
         @Override
         public boolean onMouseClick(NUIMouseClickEvent event) {
@@ -74,6 +73,8 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
 
     public int getDepth() { return depth; }
 
+    public void setInSortOrder(boolean inSortOrder) { this.inSortOrder = inSortOrder; }
+
     public void setDepthAuto() {
         if (SortOrder.isInitialized()) {
             depth = SortOrder.getCurrent();
@@ -96,98 +97,41 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
 
     @Override
     public void onOpened() {
-        /*
-        if (!checkIfContains()) {
-            setIndex();
-        }*/
         logger.info("name: "+this+" ~~~ depth: "+depth);
         if (depth == -999999) {
             setDepthAuto();
         }
-        logger.info("depthB: "+depth);
         animationSystem.triggerFromPrev();
         onScreenOpened();
     }
 
+    /**
+     * adds or removes from enabledWidgets based on if the screen is showing or not
+     * @param showing if the screen is visible or not
+     */
     protected void addOrRemove(boolean showing) {
         if (SortOrder.getEnabledWidgets() != null) {
             if (!SortOrder.getEnabledWidgets().contains(this)) {
-                logger.info("enabledWidgets: " + SortOrder.getEnabledWidgets());
                 if (showing) {
-                    logger.info("making it");
                     ArrayList<CoreScreenLayer> enabledWidgets = SortOrder.getEnabledWidgets();
 
                     enabledWidgets.add(this);
                     SortOrder.setEnabledWidgets(enabledWidgets);
 
                     SortOrder.addAnother(depth);
-
-                    logger.info("enabledWidgets: " + SortOrder.getEnabledWidgets());
                 }
             } else {
-                logger.info("in else...");
                 if (!showing) {
-                    logger.info("deleting it");
                     ArrayList<CoreScreenLayer> enabledWidgets = SortOrder.getEnabledWidgets();
                     enabledWidgets.remove(this);
                     SortOrder.setEnabledWidgets(enabledWidgets);
 
                     SortOrder.removeOne(depth);
-
-                    //ArrayList<Class<AbstractWidget>> widgets = SortOrder.getWidgetList();
-                    //SortOrder.changeWidgetList((Class<AbstractWidget>) this.getClass(), this.getDepth(), false);
                 }
             }
-                        /*
-            boolean contains = checkIfContains();
-
-            if (SortOrder.getEnabledWidgets().size()==0||!contains) {
-                logger.info("enabledWidgets: " + SortOrder.getEnabledWidgets());
-                if (showing) {
-                    logger.info("making it");
-                    ArrayList<CoreScreenLayer> enabledWidgets = SortOrder.getEnabledWidgets();
-
-                    enabledWidgets.add(this);
-                    SortOrder.setEnabledWidgets(enabledWidgets);
-
-                    logger.info("enabledWidgets: " + SortOrder.getEnabledWidgets());
-                }
-            } else{
-                logger.info("in else...");
-                if (!showing) {
-                    logger.info("deleting it");
-                    ArrayList<CoreScreenLayer> enabledWidgets = SortOrder.getEnabledWidgets();
-                    enabledWidgets.remove(this);
-                    //////////////////////////////
-                    for (int i = 0; i < enabledWidgets.size(); i++) {
-                        if (enabledWidgets.get(i).getIndex() == getIndex()) {
-                            enabledWidgets.remove(i);
-                            logger.info("removed");
-                        }
-                    } ///////////////////////////////////////
-                    SortOrder.setEnabledWidgets(enabledWidgets);
-
-                    //ArrayList<Class<AbstractWidget>> widgets = SortOrder.getWidgetList();
-                    //SortOrder.changeWidgetList((Class<AbstractWidget>) this.getClass(), this.getDepth(), false);
-                }
-            }*/
+            SortOrder.rotateOrder(false);
         }
     }
-
-    /*
-    private boolean checkIfContains() {
-        if (SortOrder.isInitialized()) {
-            Iterator iterator = SortOrder.getEnabledWidgets().iterator();
-            while (iterator.hasNext()) {
-                CoreScreenLayer next = (CoreScreenLayer) iterator.next();
-                if (next.getIndex() == getIndex()) {
-                    return true;
-                }
-            }
-            return  false;
-        }
-        return false;
-    }*/
 
     /**
      * Lifecycle method called when this screen is displayed under any circumstance.
@@ -197,8 +141,9 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
      * (e.g., a parent menu in the menu system) is returned to (as {@code onShow}).
      */
     public void onScreenOpened() {
-        logger.info("opening...");
-        addOrRemove(true);
+        if (!inSortOrder) {
+            addOrRemove(true);
+        }
     }
 
     public final int getIndex() { return index; }
@@ -236,7 +181,9 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
     @Override
     public void update(float delta) {
         if (contents != null) {
-            contents.update(delta);
+            //if (!updateFrozen) {
+                contents.update(delta);
+            //}
             animationSystem.update(delta);
 
             if (depth == -999999) {
@@ -256,13 +203,15 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
 
     @Override
     public void onClosed() {
-        logger.info("closing...");
-        addOrRemove(false);
+        if (!inSortOrder) {
+            addOrRemove(false);
+        }
     }
 
     @Override
     public void onShow() {
-        addOrRemove(true);
+        //updateFrozen = false;
+        //getManager().setUpdateFrozen(false);
         animationSystem.triggerFromNext();
         onScreenOpened();
     }

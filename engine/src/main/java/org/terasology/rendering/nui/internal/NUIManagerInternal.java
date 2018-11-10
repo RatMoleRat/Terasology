@@ -79,6 +79,7 @@ public class NUIManagerInternal extends BaseComponentSystem implements NUIManage
     private MouseDevice mouse;
     private DisplayDevice display;
     private boolean forceReleaseMouse;
+    private boolean updateFrozen;
 
     private Map<ResourceUrn, ControlWidget> overlays = Maps.newLinkedHashMap();
     private Context context;
@@ -105,6 +106,9 @@ public class NUIManagerInternal extends BaseComponentSystem implements NUIManage
         maaTypeManager.getAssetType(UIElement.class).ifPresent(type -> type.disposeAll());
     }
 
+    public Deque<UIScreenLayer> getScreens() {
+        return screens;
+    }
     public void refreshWidgetsLibrary() {
         widgetsLibrary = new WidgetLibrary(context);
         ModuleEnvironment environment = context.get(ModuleManager.class).getEnvironment();
@@ -174,8 +178,11 @@ public class NUIManagerInternal extends BaseComponentSystem implements NUIManage
 
     private void closeScreen(ResourceUrn screenUri, boolean sendEvents) {
         UIScreenLayer screen = screenLookup.remove(screenUri);
+        logger.info("screens: "+screens);
+        logger.info("screen: "+screen);
         if (screen != null) {
             screens.remove(screen);
+            logger.info("screens: "+screens);
             onCloseScreen(screen, screenUri, sendEvents);
         }
     }
@@ -185,6 +192,11 @@ public class NUIManagerInternal extends BaseComponentSystem implements NUIManage
         closeScreen(screenUri, sendEvents);
     }
 
+    @Override
+    public ResourceUrn getUri(UIScreenLayer screen) {
+        BiMap<ResourceUrn, UIScreenLayer> lookup =  HashBiMap.create(screenLookup);
+        return lookup.inverse().remove(screen);
+    }
     @Override
     public void closeScreen(UIScreenLayer screen) {
         if (screens.remove(screen)) {

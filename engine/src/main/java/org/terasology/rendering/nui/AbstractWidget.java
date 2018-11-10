@@ -227,13 +227,6 @@ public abstract class AbstractWidget implements UIWidget {
 
     }
 
-    public int getDepth() {
-        return depth;
-    }
-    public void setDepth(int toSet) {
-        depth = toSet;
-    }
-
     public void bindEnabled(Binding<Boolean> binding) {
         enabled = binding;
 

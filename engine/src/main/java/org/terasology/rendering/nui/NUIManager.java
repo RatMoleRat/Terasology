@@ -22,6 +22,8 @@ import org.terasology.rendering.nui.asset.UIElement;
 import org.terasology.rendering.nui.internal.CanvasControl;
 import org.terasology.rendering.nui.layers.hud.HUDScreenLayer;
 
+import java.util.Deque;
+
 /**
  */
 public interface NUIManager extends ComponentSystem, FocusManager {
@@ -107,6 +109,12 @@ public interface NUIManager extends ComponentSystem, FocusManager {
     void removeOverlay(String uri);
 
     void removeOverlay(ResourceUrn uri);
+
+    Deque<UIScreenLayer> getScreens();
+
+    ResourceUrn getUri(UIScreenLayer screen);
+
+    //void setUpdateFrozen(boolean updateFrozen);
 
     void clear();
 
