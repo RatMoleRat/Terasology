@@ -15,6 +15,9 @@
  */
 package org.terasology.rendering.nui;
 
+//TODO: rerun idea and test. check if setting depth for inventory screen works or not
+//TODO: opt out some componenets
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.assets.ResourceUrn;
@@ -54,9 +57,6 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
     @LayoutConfig
     private UIWidget contents;
 
-    @LayoutConfig
-    private int depth=-999999;
-
     private NUIManager manager;
 
     private int index;
@@ -95,7 +95,8 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
     @Override
     public void onOpened() {
         logger.info("name: "+this+" ~~~ depth: "+depth);
-        if (depth == -999999) {
+        if (depth <= 0) {
+            logger.info("no suitable depth found. getting auto depth...");
             setDepthAuto();
         }
         animationSystem.triggerFromPrev();
