@@ -1,6 +1,7 @@
 {
     "type": "inventoryScreen",
     "skin": "inventoryDefault",
+    "depth": 10,
     "contents": {
         "type": "relativeLayout",
         "contents": [

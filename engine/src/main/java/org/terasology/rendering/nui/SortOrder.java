@@ -1,9 +1,8 @@
 package org.terasology.rendering.nui;
 
+import com.google.common.collect.Queues;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.context.Context;
-import org.terasology.context.internal.ContextImpl;
 import org.terasology.engine.SimpleUri;
 import org.terasology.engine.subsystem.config.BindsManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -19,9 +18,7 @@ import org.terasology.input.internal.BindableButtonImpl;
 import org.terasology.logic.players.event.OnPlayerSpawnedEvent;
 import org.terasology.registry.In;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 
 @RegisterSystem(RegisterMode.ALWAYS)
 public class SortOrder extends BaseComponentSystem {
@@ -32,12 +29,9 @@ public class SortOrder extends BaseComponentSystem {
     private static int uiIndex;
     private static int first;
     private static final Logger logger = LoggerFactory.getLogger(SortOrder.class);
-    //private static ArrayList<Class<AbstractWidget>> widgetList;
-    //private static ArrayList<AbstractWidget> enabledWidgets;
+    private static boolean inSortOrder;
     private static ArrayList<CoreScreenLayer> enabledWidgets;
     private static boolean initialized = false;
-    private Canvas canvas;
-    private Context context;
 
     @In
     private BindsManager bindsManager;
@@ -102,14 +96,14 @@ public class SortOrder extends BaseComponentSystem {
         index = 0;
         uiIndex = -1;
         layersFilled = new ArrayList<Integer[]>();
-        //widgetList = new ArrayList<Class<AbstractWidget>>();
-        //enabledWidgets = new ArrayList<AbstractWidget>();
         enabledWidgets = new ArrayList<CoreScreenLayer>();
-        context = new ContextImpl();
+        inSortOrder = false;
     }
 
     @ReceiveEvent
     public void changeFocus(FocusChangedEvent event, EntityRef ref) {
+        logger.info("size of layers fillde: "+layersFilled.size());
+        logger.info("enabledWidgets length: "+enabledWidgets.size());
         rotateOrder(true);
     }
 
@@ -136,21 +130,27 @@ public class SortOrder extends BaseComponentSystem {
 
             int tempIndex = index;
             int timesLooping = 0;
+
+            logger.info("enabledWidgets size: "+enabledWidgets.size());
             ArrayList<CoreScreenLayer> widgetsCopy = new ArrayList<CoreScreenLayer>(enabledWidgets);
+
+            //removes and closes duplicates
+            Set<String> set = new HashSet<String>();
+
             while (!loopThroughDone) {
                 for (CoreScreenLayer widget : widgetsCopy) {
-                    widget.setInSortOrder(true);
+                    inSortOrder = true;
                     if (widget.getDepth() == iterator) {
                         String id = widget.getId();
                         logger.info("drawn: " + widget.getId() + " ~~~ iterator: " + iterator);
-
-                        widget.getManager().pushScreen(widget.getId());
+                        widget.getManager().pushScreen(id);
                         widget.getManager().render();
                     }
-                    widget.setInSortOrder(false);
+                    inSortOrder = false;
                 }
                 if (tempIndex < layersFilled.size()) {
                     iterator = layersFilled.get(tempIndex)[0];
+                    logger.info("interator: "+iterator);
                     tempIndex++;
                 } else {
                     tempIndex = 0;
@@ -160,6 +160,21 @@ public class SortOrder extends BaseComponentSystem {
                 }
                 timesLooping++;
             }
+            for (CoreScreenLayer layer:enabledWidgets) {
+                Deque<UIScreenLayer> screens = layer.getManager().getScreens();
+                Deque<UIScreenLayer> toCreate = Queues.newArrayDeque();
+                for (UIScreenLayer screen: screens) {
+                    if (!toCreate.contains(screen)) {
+                        toCreate.add(screen);
+                        logger.info("adding "+screen);
+                    }
+                }
+                logger.info("tocreate length: "+toCreate.size());
+                layer.getManager().setScreens(toCreate);
+            }
+
+            enabledWidgets = widgetsCopy;
+            logger.info("enabledWidgets size after: "+enabledWidgets.size());
         }
     }
 
@@ -226,4 +241,6 @@ public class SortOrder extends BaseComponentSystem {
     public static boolean isInitialized() {
         return initialized;
     }
+
+    public static boolean isInSortOrder() {return inSortOrder; }
 }

@@ -112,6 +112,8 @@ public interface NUIManager extends ComponentSystem, FocusManager {
 
     Deque<UIScreenLayer> getScreens();
 
+    void setScreens(Deque<UIScreenLayer> screens);
+
     ResourceUrn getUri(UIScreenLayer screen);
 
     //void setUpdateFrozen(boolean updateFrozen);

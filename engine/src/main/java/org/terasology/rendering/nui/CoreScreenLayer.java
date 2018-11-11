@@ -39,7 +39,6 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
 
     private  static final Logger logger = LoggerFactory.getLogger(CoreScreenLayer.class);
 
-    private boolean inSortOrder = false;
     private static final InteractionListener DEFAULT_SCREEN_LISTENER = new BaseInteractionListener() {
         @Override
         public boolean onMouseClick(NUIMouseClickEvent event) {
@@ -72,8 +71,6 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
     }
 
     public int getDepth() { return depth; }
-
-    public void setInSortOrder(boolean inSortOrder) { this.inSortOrder = inSortOrder; }
 
     public void setDepthAuto() {
         if (SortOrder.isInitialized()) {
@@ -122,6 +119,7 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
                 }
             } else {
                 if (!showing) {
+                    logger.info("removing");
                     ArrayList<CoreScreenLayer> enabledWidgets = SortOrder.getEnabledWidgets();
                     enabledWidgets.remove(this);
                     SortOrder.setEnabledWidgets(enabledWidgets);
@@ -129,7 +127,7 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
                     SortOrder.removeOne(depth);
                 }
             }
-            SortOrder.rotateOrder(false);
+//            SortOrder.rotateOrder(false);
         }
     }
 
@@ -141,7 +139,7 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
      * (e.g., a parent menu in the menu system) is returned to (as {@code onShow}).
      */
     public void onScreenOpened() {
-        if (!inSortOrder) {
+        if (!SortOrder.isInSortOrder()) {
             addOrRemove(true);
         }
     }
@@ -203,8 +201,10 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
 
     @Override
     public void onClosed() {
-        if (!inSortOrder) {
+        if (!SortOrder.isInSortOrder()) {
             addOrRemove(false);
+            //this.getManager().clear();
+            //this.getManager().getScreens().remove(this);
         }
     }
 
@@ -218,6 +218,11 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
 
     @Override
     public void onHide() {
+        if (!SortOrder.isInSortOrder()) {
+            addOrRemove(false);
+            //this.getManager().getScreens().remove(this);
+            //this.getManager().clear();
+        }
     }
 
     @Override

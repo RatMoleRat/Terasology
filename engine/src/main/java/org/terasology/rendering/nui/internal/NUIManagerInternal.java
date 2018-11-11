@@ -105,9 +105,13 @@ public class NUIManagerInternal extends BaseComponentSystem implements NUIManage
         ModuleAwareAssetTypeManager maaTypeManager = context.get(ModuleAwareAssetTypeManager.class);
         maaTypeManager.getAssetType(UIElement.class).ifPresent(type -> type.disposeAll());
     }
-
+    @Override
     public Deque<UIScreenLayer> getScreens() {
         return screens;
+    }
+    @Override
+    public void setScreens(Deque<UIScreenLayer> toSet) {
+        screens = toSet;
     }
     public void refreshWidgetsLibrary() {
         widgetsLibrary = new WidgetLibrary(context);
@@ -178,8 +182,8 @@ public class NUIManagerInternal extends BaseComponentSystem implements NUIManage
 
     private void closeScreen(ResourceUrn screenUri, boolean sendEvents) {
         UIScreenLayer screen = screenLookup.remove(screenUri);
-        logger.info("screens: "+screens);
         logger.info("screen: "+screen);
+        logger.info("screen id: "+screen.getId());
         if (screen != null) {
             screens.remove(screen);
             logger.info("screens: "+screens);
