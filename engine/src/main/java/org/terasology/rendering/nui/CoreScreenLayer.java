@@ -99,6 +99,11 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
             logger.info("no suitable depth found. getting auto depth...");
             setDepthAuto();
         }
+        if (SortOrder.isInitialized()) {
+            if (!SortOrder.getUsed().contains(depth)) {
+                SortOrder.getUsed().add(depth);
+            }
+        }
         animationSystem.triggerFromPrev();
         onScreenOpened();
     }

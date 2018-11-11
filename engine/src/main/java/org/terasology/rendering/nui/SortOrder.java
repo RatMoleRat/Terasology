@@ -32,6 +32,7 @@ public class SortOrder extends BaseComponentSystem {
     private static boolean inSortOrder;
     private static ArrayList<CoreScreenLayer> enabledWidgets;
     private static boolean initialized = false;
+    private static ArrayList<Integer> used;
 
     @In
     private BindsManager bindsManager;
@@ -97,6 +98,7 @@ public class SortOrder extends BaseComponentSystem {
         uiIndex = -1;
         layersFilled = new ArrayList<Integer[]>();
         enabledWidgets = new ArrayList<CoreScreenLayer>();
+        used = new ArrayList<Integer>();
         inSortOrder = false;
     }
 
@@ -106,16 +108,26 @@ public class SortOrder extends BaseComponentSystem {
         logger.info("enabledWidgets length: "+enabledWidgets.size());
         rotateOrder(true);
     }
-
+    /*
+    public static void setIndexOffLayers(int currentDepth) {
+        if (initialized&&layersFilled.size()>0) {
+            for (Integer[] piece : layersFilled) {
+                if (piece[0] == currentDepth) {
+                    logger.info("depth found.");
+                    index = layersFilled.indexOf(piece)-1;
+                    break;
+                }
+            }
+        }
+    }*/
     /**
      * rotates through the elements
-     * @param increment
+     * @param increase where or not to increment index
      */
-    public static void rotateOrder(boolean increment) {
+    public static void rotateOrder(boolean increase) {
         if (layersFilled.size()>0) {
             Collections.sort(layersFilled, (a, b) -> Math.max(a[0], b[0]));
-            logger.info("changing focus");
-            if (increment) {
+            if (increase) {
                 index++;
             }
             int iterator;
@@ -125,6 +137,7 @@ public class SortOrder extends BaseComponentSystem {
                 index = 0;
                 iterator = layersFilled.get(index)[0];
             }
+            logger.info("changing focus");
             boolean loopThroughDone = false;
 
 
@@ -182,21 +195,14 @@ public class SortOrder extends BaseComponentSystem {
     }
 
     /**
-     * for sorting layersFilled
-     * @param a
-     * @param b
-     * @return
-     */
-    private Integer forSort(Integer[] a, Integer[] b) {
-        return Math.max(a[0], b[0]);
-    }
-
-    /**
      * increments current (for depth)
      * @return the new value of current
      */
     public static int getCurrent() {
         current++;
+        while (used.contains(current)) {
+            current++;
+        }
         return current;
     }
 
@@ -246,4 +252,6 @@ public class SortOrder extends BaseComponentSystem {
     }
 
     public static boolean isInSortOrder() {return inSortOrder; }
+    public static ArrayList<Integer> getUsed() { return used; }
+    public static void setUsed(ArrayList<Integer> other) { used = other; }
 }
