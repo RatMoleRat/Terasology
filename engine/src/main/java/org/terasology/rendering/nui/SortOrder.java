@@ -150,11 +150,14 @@ public class SortOrder extends BaseComponentSystem {
                 }
                 if (tempIndex < layersFilled.size()) {
                     iterator = layersFilled.get(tempIndex)[0];
-                    logger.info("interator: "+iterator);
+                    logger.info("iterator: "+iterator);
                     tempIndex++;
                 } else {
                     tempIndex = 0;
+                    iterator = layersFilled.get(tempIndex)[0];
+                    tempIndex++;
                 }
+                logger.info("tempIndex: "+tempIndex);
                 if (timesLooping > layersFilled.size()) {
                     loopThroughDone = true;
                 }
