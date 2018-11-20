@@ -15,11 +15,6 @@
  */
 package org.terasology.rendering.nui;
 
-//TODO: rerun idea and test. check if setting depth for inventory screen works or not
-//TODO: opt out some componenets
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.terasology.assets.ResourceUrn;
 import org.terasology.input.BindButtonEvent;
 import org.terasology.input.Keyboard;
@@ -39,8 +34,6 @@ import java.util.Collections;
 import java.util.Iterator;
 
 public abstract class CoreScreenLayer extends AbstractWidget implements UIScreenLayer {
-
-    private  static final Logger logger = LoggerFactory.getLogger(CoreScreenLayer.class);
 
     private static final InteractionListener DEFAULT_SCREEN_LISTENER = new BaseInteractionListener() {
         @Override
@@ -75,7 +68,6 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
     public void setDepthAuto() {
         if (SortOrder.isInitialized()) {
             depth = SortOrder.getCurrent();
-            logger.info("this: "+this+" ~~~ depth: "+depth);
         }
     }
 
@@ -94,9 +86,7 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
 
     @Override
     public void onOpened() {
-        logger.info("name: "+this+" ~~~ depth: "+depth);
         if (depth <= 0) {
-            logger.info("no suitable depth found. getting auto depth...");
             setDepthAuto();
         }
         if (SortOrder.isInitialized()) {
@@ -125,7 +115,6 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
                 }
             } else {
                 if (!showing) {
-                    logger.info("removing");
                     ArrayList<CoreScreenLayer> enabledWidgets = SortOrder.getEnabledWidgets();
                     enabledWidgets.remove(this);
                     SortOrder.setEnabledWidgets(enabledWidgets);

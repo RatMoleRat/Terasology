@@ -1,8 +1,6 @@
 package org.terasology.rendering.nui;
 
 import com.google.common.collect.Queues;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.terasology.engine.SimpleUri;
 import org.terasology.engine.subsystem.config.BindsManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -18,7 +16,13 @@ import org.terasology.input.internal.BindableButtonImpl;
 import org.terasology.logic.players.event.OnPlayerSpawnedEvent;
 import org.terasology.registry.In;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 
 @RegisterSystem(RegisterMode.ALWAYS)
 public class SortOrder extends BaseComponentSystem {
@@ -28,7 +32,6 @@ public class SortOrder extends BaseComponentSystem {
     private static int index;
     private static int uiIndex;
     private static int first;
-    private static final Logger logger = LoggerFactory.getLogger(SortOrder.class);
     private static boolean inSortOrder;
     private static ArrayList<CoreScreenLayer> enabledWidgets;
     private static boolean initialized = false;
@@ -45,10 +48,8 @@ public class SortOrder extends BaseComponentSystem {
     @ReceiveEvent
     public void onPlayerSpawnedEvent(OnPlayerSpawnedEvent event, EntityRef player) {
         initialized = true;
-        logger.info("initializing...");
         Map<Integer, BindableButton> keys = bindsManager.getKeyBinds();
         if (keys.containsKey(Keyboard.Key.SEMICOLON.getId())) {
-            logger.info("contains key!");
             keys.get(Keyboard.Key.SEMICOLON.getId()).subscribe(new BindButtonSubscriber() {
                 @Override
                 public boolean onPress(float delta, EntityRef target) {
@@ -68,7 +69,6 @@ public class SortOrder extends BaseComponentSystem {
                 }
             });
         } else {
-            logger.info("doesn't contain key");
             BindButtonSubscriber bindButtonSubscriber = new BindButtonSubscriber() {
                 @Override
                 public boolean onPress(float delta, EntityRef target) {
@@ -88,9 +88,7 @@ public class SortOrder extends BaseComponentSystem {
                 }
             };
             keys.put(Keyboard.Key.SEMICOLON.getId(), new BindableButtonImpl(new SimpleUri("changeFocus"), "Change Focus", new BindButtonEvent()));
-            logger.info("made key!");
             keys.get(Keyboard.Key.SEMICOLON.getId()).subscribe(bindButtonSubscriber);
-            logger.info("added subscriber!");
         }
         current = 0;
         first = 0;
@@ -104,22 +102,8 @@ public class SortOrder extends BaseComponentSystem {
 
     @ReceiveEvent
     public void changeFocus(FocusChangedEvent event, EntityRef ref) {
-        logger.info("size of layers fillde: "+layersFilled.size());
-        logger.info("enabledWidgets length: "+enabledWidgets.size());
         rotateOrder(true);
     }
-    /*
-    public static void setIndexOffLayers(int currentDepth) {
-        if (initialized&&layersFilled.size()>0) {
-            for (Integer[] piece : layersFilled) {
-                if (piece[0] == currentDepth) {
-                    logger.info("depth found.");
-                    index = layersFilled.indexOf(piece)-1;
-                    break;
-                }
-            }
-        }
-    }*/
     /**
      * rotates through the elements
      * @param increase where or not to increment index
@@ -137,14 +121,12 @@ public class SortOrder extends BaseComponentSystem {
                 index = 0;
                 iterator = layersFilled.get(index)[0];
             }
-            logger.info("changing focus");
             boolean loopThroughDone = false;
 
 
             int tempIndex = index;
             int timesLooping = 0;
 
-            logger.info("enabledWidgets size: "+enabledWidgets.size());
             ArrayList<CoreScreenLayer> widgetsCopy = new ArrayList<CoreScreenLayer>(enabledWidgets);
 
             //removes and closes duplicates
@@ -155,7 +137,6 @@ public class SortOrder extends BaseComponentSystem {
                     inSortOrder = true;
                     if (widget.getDepth() == iterator) {
                         String id = widget.getId();
-                        logger.info("drawn: " + widget.getId() + " ~~~ iterator: " + iterator);
                         widget.getManager().pushScreen(id);
                         widget.getManager().render();
                     }
@@ -163,14 +144,12 @@ public class SortOrder extends BaseComponentSystem {
                 }
                 if (tempIndex < layersFilled.size()) {
                     iterator = layersFilled.get(tempIndex)[0];
-                    logger.info("iterator: "+iterator);
                     tempIndex++;
                 } else {
                     tempIndex = 0;
                     iterator = layersFilled.get(tempIndex)[0];
                     tempIndex++;
                 }
-                logger.info("tempIndex: "+tempIndex);
                 if (timesLooping > layersFilled.size()) {
                     loopThroughDone = true;
                 }
@@ -182,15 +161,12 @@ public class SortOrder extends BaseComponentSystem {
                 for (UIScreenLayer screen: screens) {
                     if (!toCreate.contains(screen)) {
                         toCreate.add(screen);
-                        logger.info("adding "+screen);
                     }
                 }
-                logger.info("tocreate length: "+toCreate.size());
                 layer.getManager().setScreens(toCreate);
             }
 
             enabledWidgets = widgetsCopy;
-            logger.info("enabledWidgets size after: "+enabledWidgets.size());
         }
     }
 

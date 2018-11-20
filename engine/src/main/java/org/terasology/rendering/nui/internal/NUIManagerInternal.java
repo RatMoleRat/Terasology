@@ -182,11 +182,8 @@ public class NUIManagerInternal extends BaseComponentSystem implements NUIManage
 
     private void closeScreen(ResourceUrn screenUri, boolean sendEvents) {
         UIScreenLayer screen = screenLookup.remove(screenUri);
-        logger.info("screen: "+screen);
-        logger.info("screen id: "+screen.getId());
         if (screen != null) {
             screens.remove(screen);
-            logger.info("screens: "+screens);
             onCloseScreen(screen, screenUri, sendEvents);
         }
     }

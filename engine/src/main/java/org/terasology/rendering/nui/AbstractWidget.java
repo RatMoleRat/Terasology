@@ -16,8 +16,6 @@
 package org.terasology.rendering.nui;
 
 import com.google.common.collect.Lists;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.terasology.rendering.nui.databinding.Binding;
 import org.terasology.rendering.nui.databinding.DefaultBinding;
 import org.terasology.rendering.nui.databinding.ReadOnlyBinding;
@@ -48,12 +46,9 @@ public abstract class AbstractWidget implements UIWidget {
     @LayoutConfig
     private float tooltipDelay = 0.5f;
 
-    @LayoutConfig
-    protected int depth = new DefaultBinding<Integer>(-99999).get();//=-999999;
+    protected int depth = new DefaultBinding<Integer>(-99999).get();
 
     private boolean focused;
-
-    private static  final Logger logger = LoggerFactory.getLogger(AbstractWidget.class);
 
     @LayoutConfig
     private Binding<Boolean> enabled = new DefaultBinding<>(true);
@@ -154,7 +149,6 @@ public abstract class AbstractWidget implements UIWidget {
     }
 
     public void setVisible(boolean visible) {
-        logger.info("setting visible");
         this.visible.set(visible);
         //addOrRemove();
     }
