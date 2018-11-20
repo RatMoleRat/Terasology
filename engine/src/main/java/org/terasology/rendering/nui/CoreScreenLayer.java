@@ -63,7 +63,9 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
         super(id);
     }
 
-    public int getDepth() { return depth; }
+    public int getDepth() {
+        return depth;
+    }
 
     public void setDepthAuto() {
         if (SortOrder.isInitialized()) {
@@ -138,7 +140,10 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
         }
     }
 
-    public final int getIndex() { return index; }
+    public final int getIndex() {
+        return index;
+    }
+
     public final void setIndex() {
         if (SortOrder.isInitialized()) {
             this.index = SortOrder.makeIndex();

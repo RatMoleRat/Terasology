@@ -35,19 +35,15 @@ import org.terasology.registry.In;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 
 @RegisterSystem(RegisterMode.ALWAYS)
 public class SortOrder extends BaseComponentSystem {
-    private static ArrayList<Integer> id;
     private static int current;
     private static ArrayList<Integer[]> layersFilled; //arg1 of the Integer[] is the layer depth, arg2 is the number of things on that layer
     private static int index;
     private static int uiIndex;
-    private static int first;
     private static boolean inSortOrder;
     private static ArrayList<CoreScreenLayer> enabledWidgets;
     private static boolean initialized = false;
@@ -107,12 +103,11 @@ public class SortOrder extends BaseComponentSystem {
             keys.get(Keyboard.Key.SEMICOLON.getId()).subscribe(bindButtonSubscriber);
         }
         current = 0;
-        first = 0;
         index = 0;
         uiIndex = -1;
-        layersFilled = new ArrayList<Integer[]>();
-        enabledWidgets = new ArrayList<CoreScreenLayer>();
-        used = new ArrayList<Integer>();
+        layersFilled = new ArrayList<>();
+        enabledWidgets = new ArrayList<>();
+        used = new ArrayList<>();
         inSortOrder = false;
     }
 
@@ -125,7 +120,7 @@ public class SortOrder extends BaseComponentSystem {
      * @param increase where or not to increment index
      */
     public static void rotateOrder(boolean increase) {
-        if (layersFilled.size()>0) {
+        if (layersFilled.size() > 0) {
             Collections.sort(layersFilled, (a, b) -> Math.max(a[0], b[0]));
             if (increase) {
                 index++;
@@ -143,17 +138,14 @@ public class SortOrder extends BaseComponentSystem {
             int tempIndex = index;
             int timesLooping = 0;
 
-            ArrayList<CoreScreenLayer> widgetsCopy = new ArrayList<CoreScreenLayer>(enabledWidgets);
-
-            //removes and closes duplicates
-            Set<String> set = new HashSet<String>();
+            ArrayList<CoreScreenLayer> widgetsCopy = new ArrayList<>(enabledWidgets);
 
             while (!loopThroughDone) {
                 for (CoreScreenLayer widget : widgetsCopy) {
                     inSortOrder = true;
                     if (widget.getDepth() == iterator) {
-                        String id = widget.getId();
-                        widget.getManager().pushScreen(id);
+                        String widgId = widget.getId();
+                        widget.getManager().pushScreen(widgId);
                         widget.getManager().render();
                     }
                     inSortOrder = false;
@@ -218,7 +210,7 @@ public class SortOrder extends BaseComponentSystem {
      * @param layer the depth
      */
     public static void removeOne(int layer) {
-        for (int i=0; i<layersFilled.size(); i++) {
+        for (int i = 0; i < layersFilled.size(); i++) {
             if (layersFilled.get(i)[0] == layer) {
                 layersFilled.get(i)[1]--;
                 return;
@@ -243,7 +235,13 @@ public class SortOrder extends BaseComponentSystem {
         return initialized;
     }
 
-    public static boolean isInSortOrder() {return inSortOrder; }
-    public static ArrayList<Integer> getUsed() { return used; }
-    public static void setUsed(ArrayList<Integer> other) { used = other; }
+    public static boolean isInSortOrder() {
+        return inSortOrder;
+    }
+    public static ArrayList<Integer> getUsed() {
+        return used;
+    }
+    public static void setUsed(ArrayList<Integer> other) {
+        used = other;
+    }
 }
