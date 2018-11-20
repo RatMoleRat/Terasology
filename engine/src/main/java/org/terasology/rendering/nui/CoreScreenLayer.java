@@ -122,7 +122,6 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
                     SortOrder.removeOne(depth);
                 }
             }
-//            SortOrder.rotateOrder(false);
         }
     }
 
@@ -174,9 +173,7 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
     @Override
     public void update(float delta) {
         if (contents != null) {
-            //if (!updateFrozen) {
-                contents.update(delta);
-            //}
+            contents.update(delta);
             animationSystem.update(delta);
 
             if (depth == -999999) {
@@ -198,15 +195,11 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
     public void onClosed() {
         if (!SortOrder.isInSortOrder()) {
             addOrRemove(false);
-            //this.getManager().clear();
-            //this.getManager().getScreens().remove(this);
         }
     }
 
     @Override
     public void onShow() {
-        //updateFrozen = false;
-        //getManager().setUpdateFrozen(false);
         animationSystem.triggerFromNext();
         onScreenOpened();
     }
@@ -215,8 +208,6 @@ public abstract class CoreScreenLayer extends AbstractWidget implements UIScreen
     public void onHide() {
         if (!SortOrder.isInSortOrder()) {
             addOrRemove(false);
-            //this.getManager().getScreens().remove(this);
-            //this.getManager().clear();
         }
     }
 

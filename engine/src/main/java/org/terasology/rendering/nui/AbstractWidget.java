@@ -150,7 +150,6 @@ public abstract class AbstractWidget implements UIWidget {
 
     public void setVisible(boolean visible) {
         this.visible.set(visible);
-        //addOrRemove();
     }
 
     public boolean isEnabled() {
